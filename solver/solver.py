@@ -2,9 +2,6 @@ import re
 import numpy as np
 
 def get_variable_count(funkcja_celu, ograniczenia):
-    """
-    Znajduje liczbę zmiennych w funkcji celu i ograniczeniach.
-    """
     pattern = r"x\[(\d+)\]"  
     all_matches = re.findall(pattern, funkcja_celu)  
     for ograniczenie in ograniczenia:
