@@ -33,23 +33,61 @@ def solve():
 
 def erase():
     solution_text.delete(1.0, tk.END)
+    eq_text.delete(1.0, tk.END)
 
 root = tk.Tk()
 root.title("Solver")
+root.geometry("800x600")  
 
-get_file_button = tk.Button(root, text="Wczytaj plik", command=get_file)
+root.configure(bg="#2E2E2E")  
+
+get_file_button = tk.Button(
+    root, 
+    text="Wczytaj plik", 
+    command=get_file, 
+    bg="#4A90E2", 
+    fg="white", 
+    activebackground="#357ABD", 
+    activeforeground="white",
+    relief="flat",
+    padx=10,
+    pady=5
+)
 get_file_button.pack(pady=10)
 
-solve_button = tk.Button(root, text="Rozwiąż równanie", command=solve, state=tk.DISABLED)
+solve_button = tk.Button(
+    root, 
+    text="Rozwiąż równanie", 
+    command=solve, 
+    bg="#4A90E2", 
+    fg="white", 
+    activebackground="#357ABD", 
+    activeforeground="white",
+    relief="flat",
+    state=tk.DISABLED,
+    padx=10,
+    pady=5
+)
 solve_button.pack(pady=10)
 
-erase_button = tk.Button(root, text="Wyczyść", command=erase)
+erase_button = tk.Button(
+    root, 
+    text="Wyczyść", 
+    command=erase, 
+    bg="#4A90E2", 
+    fg="white", 
+    activebackground="#357ABD", 
+    activeforeground="white",
+    relief="flat",
+    padx=10,
+    pady=5
+)
 erase_button.pack(pady=10)
 
-eq_text = tk.Text(root, width=150, height=15)
+eq_text = tk.Text(root, width=150, height=15, bg="#1E1E1E", fg="white", insertbackground="white", bd=0)
 eq_text.pack(pady=10)
 
-solution_text = tk.Text(root, width=150, height=15)
+solution_text = tk.Text(root, width=150, height=15, bg="#1E1E1E", fg="white", insertbackground="white", bd=0)
 solution_text.pack(pady=10)
 
 root.mainloop()
