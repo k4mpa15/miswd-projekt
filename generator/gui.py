@@ -39,13 +39,13 @@ class GUI:
             # Rząd 1
             ("+", "+"), ("-", "-"), ("∙", "∙"), ("*", " * "), ("mod", " mod "),
             # Rząd 2
-            ("^", "^"), ("<", "<"), ("<=", "<="), (">", ">"), (">=", ">="),
+            ("!", "!"), ("^", "^"), ("<", "<"), ("<=", "<="), (">", ">"),
             # Rząd 3
-            ("=/=", "=/="), ("∈", " ∈ "), ("\\", " \\ "), ("∧", " ∧ "), ("∨", " ∨ "),
+            (">=", ">="), ("=", "="), ("=/=", "=/="), ("∈", " ∈ "), ("\\", " \\ "),
             # Rząd 4
-            ("(", "("), (")", ")"), ("{", "{"), ("}", "}"), ("x", "x"),
+            ("∧", " ∧ "), ("∨", " ∨ "), ("x", "x"), ("(", "("), (")", ")"),
             # Rząd 5
-            ("Z", "Z"), ("R", "R"), ("N", "N")
+            ("{", "{"), ("}", "}"), ("Z", "Z"), ("R", "R"), ("N", "N")
         ]
 
         # Tworzenie siatki przycisków
@@ -55,10 +55,10 @@ class GUI:
                 if idx < len(buttons):
                     text, value = buttons[idx]
                     btn = tk.Button(
-                        frame, text=text, width=5, height=2, font=("Arial", 12, "bold"),
+                        frame, text=text, width=5, height=2, font=("Arial", 10, "bold"),
                         command=lambda val=value: self.insert_text(val)
                     )
-                    btn.grid(row=row, column=col, padx=5, pady=5)
+                    btn.grid(row=row, column=col, padx=3, pady=3)
 
     def insert_text(self, value):
         """Wstawia tekst (symbol operacji) do aktywnego pola tekstowego."""
