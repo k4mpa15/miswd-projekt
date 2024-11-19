@@ -3,60 +3,77 @@ from tkinter import filedialog, messagebox
 import parser
 import data_handler
 
+
 class GUI:
     def __init__(self, root):
         self.root = root
-        self.root.title("Konwerter równań")
+        self.root.title("Konwerter Równań")
 
-        # Pola tekstowe
-        tk.Label(root, text="Wyznaczyć:").pack()
-        self.target_field = tk.Text(root, height=3, width=50)
-        self.target_field.pack()
+        # Pola tekstowe dla wyrażeń
+        tk.Label(root, text="Wyznaczyć:", font=("Arial", 12, "bold")).pack(pady=5)
+        self.target_field = tk.Text(root, height=3, width=50, font=("Arial", 12))
+        self.target_field.pack(pady=5)
 
-        tk.Label(root, text="takie, że:").pack()
-        self.constraints_field = tk.Text(root, height=3, width=50)
-        self.constraints_field.pack()
+        tk.Label(root, text="takie, że:", font=("Arial", 12, "bold")).pack(pady=5)
+        self.constraints_field = tk.Text(root, height=3, width=50, font=("Arial", 12))
+        self.constraints_field.pack(pady=5)
 
-        tk.Label(root, text="przy ograniczeniach:").pack()
-        self.limits_field = tk.Text(root, height=10, width=50)
-        self.limits_field.pack()
+        tk.Label(root, text="przy ograniczeniach:", font=("Arial", 12, "bold")).pack(pady=5)
+        self.limits_field = tk.Text(root, height=10, width=50, font=("Arial", 12))
+        self.limits_field.pack(pady=5)
 
-        # Przyciski operacji matematycznych
+        # Przyciski dla operacji matematycznych
         self.create_buttons()
 
-        # Przyciski akcji
-        tk.Button(root, text="Zapisz do pliku", command=self.save_to_file).pack()
-        tk.Button(root, text="Wczytaj z pliku", command=self.load_from_file).pack()
+        # Przyciski akcji (zapis/odczyt)
+        tk.Button(root, text="Zapisz do pliku", font=("Arial", 12), command=self.save_to_file).pack(pady=5)
+        tk.Button(root, text="Wczytaj z pliku", font=("Arial", 12), command=self.load_from_file).pack(pady=5)
 
     def create_buttons(self):
+        """Tworzy przyciski z symbolami matematycznymi w układzie 5x5."""
         frame = tk.Frame(self.root)
-        frame.pack()
+        frame.pack(pady=10)
 
+        # Operacje, które mają być obsługiwane
         buttons = [
-            ("Dodaj +", "+"), ("Odejmij -", "-"), ("Mnożenie *", "*"), ("Dzielenie /", "/"),
-            ("Modulo %", "%"), ("Potęga **", "**"), ("Mniejsze <", "<"),
-            ("Mniejsze równe <=", "<="), ("Większe >", ">"), ("Większe równe >=", ">="),
-            ("Nierówne =!=", "!="), ("Zawiera się E", " E "), ("Nie zawiera \\", " \\ "),
-            ("AND", " && "), ("OR", " || ")
+            # Rząd 1
+            ("+", "+"), ("-", "-"), ("∙", "∙"), ("*", " * "), ("mod", " mod "),
+            # Rząd 2
+            ("^", "^"), ("<", "<"), ("<=", "<="), (">", ">"), (">=", ">="),
+            # Rząd 3
+            ("=/=", "=/="), ("∈", " ∈ "), ("\\", " \\ "), ("∧", " ∧ "), ("∨", " ∨ "),
+            # Rząd 4
+            ("(", "("), (")", ")"), ("{", "{"), ("}", "}"), ("x", "x"),
+            # Rząd 5
+            ("Z", "Z"), ("R", "R"), ("N", "N")
         ]
 
-        for text, operator in buttons:
-            tk.Button(frame, text=text, command=lambda op=operator: self.insert_operator(op)).pack(side=tk.LEFT)
+        # Tworzenie siatki przycisków
+        for row in range(5):  # Liczba wierszy
+            for col in range(5):  # Liczba kolumn
+                idx = row * 5 + col
+                if idx < len(buttons):
+                    text, value = buttons[idx]
+                    btn = tk.Button(
+                        frame, text=text, width=5, height=2, font=("Arial", 12, "bold"),
+                        command=lambda val=value: self.insert_text(val)
+                    )
+                    btn.grid(row=row, column=col, padx=5, pady=5)
 
-    def insert_operator(self, operator):
-        # Wstawienie operatora w aktywne pole tekstowe
+    def insert_text(self, value):
+        """Wstawia tekst (symbol operacji) do aktywnego pola tekstowego."""
         active_widget = self.root.focus_get()
         if isinstance(active_widget, tk.Text):
-            active_widget.insert(tk.INSERT, operator)
+            active_widget.insert(tk.INSERT, value)
 
     def save_to_file(self):
-        # Pobranie danych z pól tekstowych
+        """Zapisuje dane do pliku w odpowiednim formacie."""
         target = self.target_field.get("1.0", tk.END).strip()
         constraints = self.constraints_field.get("1.0", tk.END).strip()
         limits = self.limits_field.get("1.0", tk.END).strip()
 
-        # Parsowanie danych i zapis do pliku
-        formatted_data = parser.format_data(target, constraints, limits)
+        # Konwersja na format elementarny
+        formatted_data = parser.format_for_file(target, constraints, limits)
         file_path = filedialog.asksaveasfilename(defaultextension=".txt",
                                                  filetypes=[("Text files", "*.txt")])
         if file_path:
@@ -64,12 +81,13 @@ class GUI:
             messagebox.showinfo("Sukces", "Dane zapisane do pliku!")
 
     def load_from_file(self):
-        # Wczytanie danych z pliku
+        """Wczytuje dane z pliku i wypełnia pola w aplikacji."""
         file_path = filedialog.askopenfilename(filetypes=[("Text files", "*.txt")])
         if file_path:
             content = data_handler.load_from_file(file_path)
             if content:
-                target, constraints, limits = content
+                # Konwersja na format przyjazny użytkownikowi
+                target, constraints, limits = parser.format_for_gui(*content)
                 self.target_field.delete("1.0", tk.END)
                 self.constraints_field.delete("1.0", tk.END)
                 self.limits_field.delete("1.0", tk.END)
