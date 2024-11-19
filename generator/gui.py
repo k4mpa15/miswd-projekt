@@ -10,34 +10,37 @@ class GUI:
         self.root = root
         self.root.title("Konwerter Równań")
 
+        # Ustawienia ogólne rozmiaru
+        self.root.geometry("500x600")  # Ustawienie mniejszego rozmiaru okna
+
         # Pola tekstowe dla wyrażeń
-        tk.Label(root, text="Wyznaczyć:", font=("Arial", 12, "bold")).pack(pady=5)
-        tk.Label(root, text="(Max. 10 zmiennych decyzyjnych)", font=("Arial", 10)).pack(pady=2)
-        self.target_field = tk.Text(root, height=3, width=50, font=("Arial", 12))
+        tk.Label(root, text="Wyznaczyć:", font=("Arial", 10, "bold")).pack(pady=5)
+        tk.Label(root, text="(Max. 10 zmiennych decyzyjnych)", font=("Arial", 8)).pack(pady=2)
+        self.target_field = tk.Text(root, height=2, width=40, font=("Arial", 10))
         self.target_field.pack(pady=5)
 
-        tk.Label(root, text="takie, że:", font=("Arial", 12, "bold")).pack(pady=5)
+        tk.Label(root, text="takie, że:", font=("Arial", 10, "bold")).pack(pady=5)
         self.optimization_type = tk.StringVar(value="")  # Przechowuje "min" lub "max"
 
         # Przyciski Min i Max
         button_frame = tk.Frame(root)
         button_frame.pack(pady=5)
-        tk.Button(button_frame, text="Min", font=("Arial", 12), width=10,
+        tk.Button(button_frame, text="Min", font=("Arial", 10), width=8,
                   command=lambda: self.set_optimization("min")).pack(side=tk.LEFT, padx=5)
-        tk.Button(button_frame, text="Max", font=("Arial", 12), width=10,
+        tk.Button(button_frame, text="Max", font=("Arial", 10), width=8,
                   command=lambda: self.set_optimization("max")).pack(side=tk.LEFT, padx=5)
 
-        tk.Label(root, text="przy ograniczeniach:", font=("Arial", 12, "bold")).pack(pady=5)
-        tk.Label(root, text="(Min. 15 ograniczeń)", font=("Arial", 10)).pack(pady=2)
-        self.limits_field = tk.Text(root, height=10, width=50, font=("Arial", 12))
+        tk.Label(root, text="przy ograniczeniach:", font=("Arial", 10, "bold")).pack(pady=5)
+        tk.Label(root, text="(Min. 15 ograniczeń)", font=("Arial", 8)).pack(pady=2)
+        self.limits_field = tk.Text(root, height=8, width=40, font=("Arial", 10))
         self.limits_field.pack(pady=5)
 
         # Przyciski dla operacji matematycznych
         self.create_buttons()
 
         # Przyciski akcji (zapis/odczyt)
-        tk.Button(root, text="Zapisz do pliku", font=("Arial", 12), command=self.save_to_file).pack(pady=5)
-        tk.Button(root, text="Wczytaj z pliku", font=("Arial", 12), command=self.load_from_file).pack(pady=5)
+        tk.Button(root, text="Zapisz do pliku", font=("Arial", 10), command=self.save_to_file).pack(pady=5)
+        tk.Button(root, text="Wczytaj z pliku", font=("Arial", 10), command=self.load_from_file).pack(pady=5)
 
     def create_buttons(self):
         """Tworzy przyciski z symbolami matematycznymi w układzie 5x5."""
@@ -58,10 +61,10 @@ class GUI:
                 if idx < len(buttons):
                     text, value = buttons[idx]
                     btn = tk.Button(
-                        frame, text=text, width=5, height=2, font=("Arial", 10, "bold"),
+                        frame, text=text, width=4, height=1, font=("Arial", 9, "bold"),
                         command=lambda val=value: self.insert_text(val)
                     )
-                    btn.grid(row=row, column=col, padx=3, pady=3)
+                    btn.grid(row=row, column=col, padx=2, pady=2)
 
     def set_optimization(self, opt_type):
         """Ustawia typ optymalizacji na 'min' lub 'max'."""
