@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import filedialog, messagebox
 import parser
 import data_handler
+import re
 
 
 class GUI:
@@ -11,6 +12,7 @@ class GUI:
 
         # Pola tekstowe dla wyrażeń
         tk.Label(root, text="Wyznaczyć:", font=("Arial", 12, "bold")).pack(pady=5)
+        tk.Label(root, text="(Max. 10 zmiennych decyzyjnych)", font=("Arial", 10)).pack(pady=2)
         self.target_field = tk.Text(root, height=3, width=50, font=("Arial", 12))
         self.target_field.pack(pady=5)
 
@@ -26,6 +28,7 @@ class GUI:
                   command=lambda: self.set_optimization("max")).pack(side=tk.LEFT, padx=5)
 
         tk.Label(root, text="przy ograniczeniach:", font=("Arial", 12, "bold")).pack(pady=5)
+        tk.Label(root, text="(Min. 15 ograniczeń)", font=("Arial", 10)).pack(pady=2)
         self.limits_field = tk.Text(root, height=10, width=50, font=("Arial", 12))
         self.limits_field.pack(pady=5)
 
@@ -78,6 +81,18 @@ class GUI:
 
         if not optimization:
             messagebox.showerror("Błąd", "Wybierz typ (Min lub Max).")
+            return
+
+        # Weryfikacja liczby zmiennych decyzyjnych
+        variables = re.findall(r'x\d+', target)  # Szuka zmiennych decyzyjnych w funkcji celu
+        if len(set(variables)) > 10:
+            messagebox.showerror("Błąd", "Funkcja celu może zawierać maksymalnie 10 zmiennych decyzyjnych.")
+            return
+
+        # Weryfikacja liczby ograniczeń
+        constraints = limits.splitlines()
+        if len(constraints) < 15:
+            messagebox.showerror("Błąd", "Musisz wprowadzić co najmniej 15 ograniczeń.")
             return
 
         formatted_data = parser.format_for_file(target, optimization, limits)
