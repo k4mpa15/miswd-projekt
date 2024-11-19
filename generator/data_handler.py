@@ -23,9 +23,9 @@ def load_from_file(file_path):
             raise ValueError("Niepoprawny format pliku. Oczekiwano trzech sekcji oddzielonych dwiema liniami przerwy.")
 
         target = sections[0].strip()
-        constraints = sections[1].strip()
+        optimization = sections[1].strip()
         limits = sections[2].strip()
 
-        return target, constraints, limits
+        return target, optimization, limits
     except Exception as e:
         raise IOError(f"Błąd wczytywania pliku: {e}")

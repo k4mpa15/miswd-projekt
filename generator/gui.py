@@ -15,8 +15,15 @@ class GUI:
         self.target_field.pack(pady=5)
 
         tk.Label(root, text="takie, że:", font=("Arial", 12, "bold")).pack(pady=5)
-        self.constraints_field = tk.Text(root, height=3, width=50, font=("Arial", 12))
-        self.constraints_field.pack(pady=5)
+        self.optimization_type = tk.StringVar(value="")  # Przechowuje "min" lub "max"
+
+        # Przyciski Min i Max
+        button_frame = tk.Frame(root)
+        button_frame.pack(pady=5)
+        tk.Button(button_frame, text="Min", font=("Arial", 12), width=10,
+                  command=lambda: self.set_optimization("min")).pack(side=tk.LEFT, padx=5)
+        tk.Button(button_frame, text="Max", font=("Arial", 12), width=10,
+                  command=lambda: self.set_optimization("max")).pack(side=tk.LEFT, padx=5)
 
         tk.Label(root, text="przy ograniczeniach:", font=("Arial", 12, "bold")).pack(pady=5)
         self.limits_field = tk.Text(root, height=10, width=50, font=("Arial", 12))
@@ -34,21 +41,14 @@ class GUI:
         frame = tk.Frame(self.root)
         frame.pack(pady=10)
 
-        # Operacje, które mają być obsługiwane
         buttons = [
-            # Rząd 1
             ("{", "{"), ("}", "}"), ("x", "x"), ("(", "("), (")", ")"),
-            # Rząd 2
             ("+", "+"), ("-", "-"), ("∙", "∙"), ("\\", " \\ "), ("^", "^"),
-            # Rząd 3
             ("!", "!"), ("*", " * "), ("mod", " mod "), ("=/=", "=/="), ("=", "="),
-            # Rząd 4
             ("<", "<"), ("<=", "<="), (">", ">"), (">=", ">="), ("∈", " ∈ "),
-            # Rząd 5
             ("∧", " ∧ "), ("∨", " ∨ "), ("R", "R"), ("Z", "Z"), ("N", "N")
         ]
 
-        # Tworzenie siatki przycisków
         for row in range(5):  # Liczba wierszy
             for col in range(5):  # Liczba kolumn
                 idx = row * 5 + col
@@ -60,6 +60,10 @@ class GUI:
                     )
                     btn.grid(row=row, column=col, padx=3, pady=3)
 
+    def set_optimization(self, opt_type):
+        """Ustawia typ optymalizacji na 'min' lub 'max'."""
+        self.optimization_type.set(opt_type)
+
     def insert_text(self, value):
         """Wstawia tekst (symbol operacji) do aktywnego pola tekstowego."""
         active_widget = self.root.focus_get()
@@ -69,11 +73,14 @@ class GUI:
     def save_to_file(self):
         """Zapisuje dane do pliku w odpowiednim formacie."""
         target = self.target_field.get("1.0", tk.END).strip()
-        constraints = self.constraints_field.get("1.0", tk.END).strip()
+        optimization = self.optimization_type.get().strip()
         limits = self.limits_field.get("1.0", tk.END).strip()
 
-        # Konwersja na format elementarny
-        formatted_data = parser.format_for_file(target, constraints, limits)
+        if not optimization:
+            messagebox.showerror("Błąd", "Wybierz typ (Min lub Max).")
+            return
+
+        formatted_data = parser.format_for_file(target, optimization, limits)
         file_path = filedialog.asksaveasfilename(defaultextension=".txt",
                                                  filetypes=[("Text files", "*.txt")])
         if file_path:
@@ -86,13 +93,11 @@ class GUI:
         if file_path:
             content = data_handler.load_from_file(file_path)
             if content:
-                # Konwersja na format przyjazny użytkownikowi
-                target, constraints, limits = parser.format_for_gui(*content)
+                target, optimization, limits = parser.format_for_gui(*content)
                 self.target_field.delete("1.0", tk.END)
-                self.constraints_field.delete("1.0", tk.END)
                 self.limits_field.delete("1.0", tk.END)
 
                 self.target_field.insert(tk.END, target)
-                self.constraints_field.insert(tk.END, constraints)
+                self.optimization_type.set(optimization)
                 self.limits_field.insert(tk.END, limits)
                 messagebox.showinfo("Sukces", "Dane wczytane z pliku!")
