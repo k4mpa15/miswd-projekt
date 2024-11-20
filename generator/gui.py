@@ -30,10 +30,12 @@ class GUI:
         # Przyciski Min i Max
         button_frame = tk.Frame(root)
         button_frame.pack(pady=5)
-        tk.Button(button_frame, text="Min", font=("Arial", 10), width=8,
-                  command=lambda: self.set_optimization("min")).pack(side=tk.LEFT, padx=5)
-        tk.Button(button_frame, text="Max", font=("Arial", 10), width=8,
-                  command=lambda: self.set_optimization("max")).pack(side=tk.LEFT, padx=5)
+        self.min_button = tk.Button(button_frame, text="Min", font=("Arial", 10), width=8,
+                                    command=lambda: self.set_optimization("min"))
+        self.min_button.pack(side=tk.LEFT, padx=5)
+        self.max_button = tk.Button(button_frame, text="Max", font=("Arial", 10), width=8,
+                                    command=lambda: self.set_optimization("max"))
+        self.max_button.pack(side=tk.LEFT, padx=5)
 
         tk.Label(root, text="przy ograniczeniach:", font=("Arial", 10, "bold")).pack(pady=5)
         tk.Label(root, text="(Min. 15 ograniczeń)", font=("Arial", 8)).pack(pady=2)
@@ -79,6 +81,16 @@ class GUI:
     def set_optimization(self, opt_type):
         """Ustawia typ optymalizacji na 'min' lub 'max'."""
         self.optimization_type.set(opt_type)
+
+        # Resetowanie wyglądu przycisków
+        self.min_button.config(bg="SystemButtonFace")
+        self.max_button.config(bg="SystemButtonFace")
+
+        # Wyróżnianie wybranego przycisku
+        if opt_type == "min":
+            self.min_button.config(bg="lightblue")  # Zmiana koloru tła
+        elif opt_type == "max":
+            self.max_button.config(bg="lightblue")
 
     def insert_text(self, value):
         """Wstawia tekst (symbol operacji) do aktywnego pola tekstowego."""
@@ -128,4 +140,5 @@ class GUI:
                 self.target_field.insert(tk.END, target)
                 self.optimization_type.set(optimization)
                 self.limits_field.insert(tk.END, limits)
+                self.set_optimization(optimization)  # Wyróżnij przycisk na podstawie wczytanych danych
                 messagebox.showinfo("Sukces", "Dane wczytane z pliku!")
