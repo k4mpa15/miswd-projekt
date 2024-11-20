@@ -11,13 +11,18 @@ class GUI:
         self.root.title("Konwerter Równań")
 
         # Ustawienia ogólne rozmiaru
-        self.root.geometry("500x600")  # Ustawienie mniejszego rozmiaru okna
+        self.root.geometry("600x700")  # Ustawienie większego rozmiaru okna
 
-        # Pola tekstowe dla wyrażeń
+        # Pola tekstowe dla wyrażeń z paskami przewijania
         tk.Label(root, text="Wyznaczyć:", font=("Arial", 10, "bold")).pack(pady=5)
         tk.Label(root, text="(Max. 10 zmiennych decyzyjnych)", font=("Arial", 8)).pack(pady=2)
-        self.target_field = tk.Text(root, height=2, width=40, font=("Arial", 10))
-        self.target_field.pack(pady=5)
+        target_frame = tk.Frame(root)
+        target_frame.pack(pady=5)
+        self.target_scroll = tk.Scrollbar(target_frame, orient=tk.VERTICAL)
+        self.target_field = tk.Text(target_frame, height=5, width=60, font=("Arial", 10), yscrollcommand=self.target_scroll.set)
+        self.target_scroll.config(command=self.target_field.yview)
+        self.target_scroll.pack(side=tk.RIGHT, fill=tk.Y)
+        self.target_field.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
 
         tk.Label(root, text="takie, że:", font=("Arial", 10, "bold")).pack(pady=5)
         self.optimization_type = tk.StringVar(value="")  # Przechowuje "min" lub "max"
@@ -32,8 +37,13 @@ class GUI:
 
         tk.Label(root, text="przy ograniczeniach:", font=("Arial", 10, "bold")).pack(pady=5)
         tk.Label(root, text="(Min. 15 ograniczeń)", font=("Arial", 8)).pack(pady=2)
-        self.limits_field = tk.Text(root, height=8, width=40, font=("Arial", 10))
-        self.limits_field.pack(pady=5)
+        limits_frame = tk.Frame(root)
+        limits_frame.pack(pady=5)
+        self.limits_scroll = tk.Scrollbar(limits_frame, orient=tk.VERTICAL)
+        self.limits_field = tk.Text(limits_frame, height=10, width=60, font=("Arial", 10), yscrollcommand=self.limits_scroll.set)
+        self.limits_scroll.config(command=self.limits_field.yview)
+        self.limits_scroll.pack(side=tk.RIGHT, fill=tk.Y)
+        self.limits_field.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
 
         # Przyciski dla operacji matematycznych
         self.create_buttons()
