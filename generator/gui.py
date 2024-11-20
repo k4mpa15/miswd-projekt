@@ -8,7 +8,7 @@ import re
 class GUI:
     def __init__(self, root):
         self.root = root
-        self.root.title("Konwerter Równań")
+        self.root.title("Generator Równań")
 
         # Ustawienia ogólne rozmiaru
         self.root.geometry("600x700")  # Ustawienie większego rozmiaru okna
