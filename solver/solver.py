@@ -1,5 +1,6 @@
 import re
 import numpy as np
+import math  # Dodano import dla obsługi silni
 
 def get_variable_count(funkcja_celu, ograniczenia):
     pattern = r"x\[(\d+)\]"  
@@ -8,7 +9,6 @@ def get_variable_count(funkcja_celu, ograniczenia):
         all_matches.extend(re.findall(pattern, ograniczenie))  
     unique_indices = sorted(set(map(int, all_matches)))  
     return max(unique_indices) + 1  
-
 
 def process_data(data):
     linie = data.strip().split("\n")
@@ -26,7 +26,9 @@ def process_data(data):
     return cel, funkcja_celu, ograniczenia
 
 def oblicz_funkcje_celu(funkcja_celu, x):
-    return eval(funkcja_celu)
+    # Dodanie `math.factorial` do kontekstu eval
+    lokalny_kontekst = {"x": x, "factorial": math.factorial, "math": math}
+    return eval(funkcja_celu, {"__builtins__": None}, lokalny_kontekst)
 
 def oblicz_gradient(funkcja_celu, x):
     gradient = np.zeros_like(x)
