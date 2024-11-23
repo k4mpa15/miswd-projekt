@@ -11,7 +11,7 @@ class GUI:
         self.root.title("Konwerter Równań")
 
         # Ustawienia ogólne rozmiaru
-        self.root.geometry("600x700")  # Ustawienie większego rozmiaru okna
+        self.root.geometry("600x750")  # Ustawienie większego rozmiaru okna
 
         # Pola tekstowe dla wyrażeń z paskami przewijania
         tk.Label(root, text="Wyznaczyć:", font=("Arial", 10, "bold")).pack(pady=5)
@@ -47,15 +47,13 @@ class GUI:
         self.limits_scroll.pack(side=tk.RIGHT, fill=tk.Y)
         self.limits_field.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
 
+        tk.Button(root, text="Grupuj ograniczenia", font=("Arial", 10), command=self.group_constraints).pack(pady=5)
         # Przyciski dla operacji matematycznych
         self.create_buttons()
 
         # Przyciski akcji (zapis/odczyt)
         tk.Button(root, text="Zapisz do pliku", font=("Arial", 10), command=self.save_to_file).pack(pady=5)
         tk.Button(root, text="Wczytaj z pliku", font=("Arial", 10), command=self.load_from_file).pack(pady=5)
-
-        # Przyciski dodatkowe
-        tk.Button(root, text="Grupuj ograniczenia", font=("Arial", 10), command=self.group_constraints).pack(pady=5)
 
     def create_buttons(self):
         """Tworzy przyciski z symbolami matematycznymi w układzie 5x5."""
