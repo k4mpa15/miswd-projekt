@@ -8,7 +8,7 @@ import re
 class GUI:
     def __init__(self, root):
         self.root = root
-        self.root.title("Generator Równań")
+        self.root.title("Konwerter Równań")
 
         # Ustawienia ogólne rozmiaru
         self.root.geometry("600x700")  # Ustawienie większego rozmiaru okna
@@ -38,7 +38,7 @@ class GUI:
         self.max_button.pack(side=tk.LEFT, padx=5)
 
         tk.Label(root, text="przy ograniczeniach:", font=("Arial", 10, "bold")).pack(pady=5)
-        tk.Label(root, text="(Min. 15 ograniczeń)", font=("Arial", 8)).pack(pady=2)
+        tk.Label(root, text="(Max. 18 ograniczeń)", font=("Arial", 8)).pack(pady=2)
         limits_frame = tk.Frame(root)
         limits_frame.pack(pady=5)
         self.limits_scroll = tk.Scrollbar(limits_frame, orient=tk.VERTICAL)
@@ -116,8 +116,8 @@ class GUI:
 
         # Weryfikacja liczby ograniczeń
         constraints = limits.splitlines()
-        if len(constraints) < 15:
-            messagebox.showerror("Błąd", "Musisz wprowadzić co najmniej 15 ograniczeń.")
+        if len(constraints) > 18:  # Maksymalna liczba ograniczeń: 18
+            messagebox.showerror("Błąd", "Możesz wprowadzić maksymalnie 18 ograniczeń.")
             return
 
         formatted_data = parser.format_for_file(target, optimization, limits)
@@ -134,6 +134,13 @@ class GUI:
             content = data_handler.load_from_file(file_path)
             if content:
                 target, optimization, limits = parser.format_for_gui(*content)
+
+                # Weryfikacja liczby ograniczeń przy wczytywaniu
+                constraints = limits.splitlines()
+                if len(constraints) > 18:
+                    messagebox.showerror("Błąd", "Plik zawiera więcej niż 18 ograniczeń.")
+                    return
+
                 self.target_field.delete("1.0", tk.END)
                 self.limits_field.delete("1.0", tk.END)
 
