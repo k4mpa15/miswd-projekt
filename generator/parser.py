@@ -7,7 +7,8 @@ def format_for_file(target, optimization, limits):
     target = convert_to_file_format(target)
     optimization = optimization.strip()
     limits = convert_to_file_format(limits)
-    return f"{target}\n\n{optimization}\n\n{limits}"
+    # Format zapisu w pliku (bez pustych linii między ograniczeniami)
+    return f"{optimization} {target}\n{limits}"
 
 
 def format_for_gui(target, optimization, limits):

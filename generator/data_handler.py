@@ -15,17 +15,25 @@ def load_from_file(file_path):
     """
     try:
         with open(file_path, "r") as file:
-            content = file.read()
+            content = file.read().strip()
 
-        # Podział na sekcje (dwie linie przerwy)
-        sections = content.split("\n\n")
-        if len(sections) != 3:
-            raise ValueError("Niepoprawny format pliku. Oczekiwano trzech sekcji oddzielonych dwiema liniami przerwy.")
+        # Podziel plik na pierwszą linię (funkcja celu z optymalizacją) i resztę (ograniczenia)
+        lines = content.splitlines()
+        if len(lines) < 2:
+            raise ValueError("Niepoprawny format pliku. Oczekiwano funkcji celu oraz ograniczeń.")
 
-        target = sections[0].strip()
-        optimization = sections[1].strip()
-        limits = sections[2].strip()
+        # Pierwsza linia: "min/max <funkcja celu>"
+        first_line = lines[0]
+        if not first_line.startswith(("min", "max")):
+            raise ValueError("Niepoprawny format pierwszej linii. Oczekiwano 'min' lub 'max'.")
 
-        return target, optimization, limits
+        # Rozdziel "min/max" od funkcji celu
+        optimization, target = first_line.split(maxsplit=1)
+
+        # Pozostałe linie to ograniczenia
+        limits = "\n".join(lines[1:])
+
+        # Zwraca dane jako krotkę
+        return (target, optimization, limits)
     except Exception as e:
         raise IOError(f"Błąd wczytywania pliku: {e}")

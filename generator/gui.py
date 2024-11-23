@@ -120,10 +120,9 @@ class GUI:
             messagebox.showerror("Błąd", "Możesz wprowadzić maksymalnie 18 ograniczeń.")
             return
 
-        # Poprawiony regex do walidacji ograniczeń
+        # Walidacja ograniczeń
         invalid_constraints = []
         for constraint in constraints:
-            # Sprawdza zarówno warunki logiczne, jak i przedziały
             if not re.match(r'^x\d+\s*(>=|<=|>|<|=|∈)\s*(-?\d+(\.\d+)?|R|Z|N|<[^>]*>)$', constraint.strip()):
                 invalid_constraints.append(constraint)
 
@@ -134,7 +133,8 @@ class GUI:
             )
             return
 
-        formatted_data = parser.format_for_file(target, optimization, limits)
+        # Formatowanie danych do zapisu
+        formatted_data = f"{optimization} {parser.format_for_file(target)}\n{parser.format_for_file(limits)}"
         file_path = filedialog.asksaveasfilename(defaultextension=".txt",
                                                  filetypes=[("Text files", "*.txt")])
         if file_path:
@@ -145,21 +145,27 @@ class GUI:
         """Wczytuje dane z pliku i wypełnia pola w aplikacji."""
         file_path = filedialog.askopenfilename(filetypes=[("Text files", "*.txt")])
         if file_path:
-            content = data_handler.load_from_file(file_path)
-            if content:
-                target, optimization, limits = parser.format_for_gui(*content)
+            try:
+                # Pobranie danych z pliku (krotka: target, optimization, limits)
+                target, optimization, limits = data_handler.load_from_file(file_path)
 
-                # Weryfikacja liczby ograniczeń przy wczytywaniu
+                # Weryfikacja liczby ograniczeń
                 constraints = limits.splitlines()
                 if len(constraints) > 18:
                     messagebox.showerror("Błąd", "Plik zawiera więcej niż 18 ograniczeń.")
                     return
 
+                # Formatowanie danych do GUI
+                target_gui = parser.format_for_gui(target, optimization, limits)[0]
+                limits_gui = parser.format_for_gui(target, optimization, limits)[2]
+
+                # Wypełnienie pól w GUI
                 self.target_field.delete("1.0", tk.END)
                 self.limits_field.delete("1.0", tk.END)
-
-                self.target_field.insert(tk.END, target)
-                self.optimization_type.set(optimization)
-                self.limits_field.insert(tk.END, limits)
+                self.target_field.insert(tk.END, target_gui)
+                self.limits_field.insert(tk.END, limits_gui)
                 self.set_optimization(optimization)  # Wyróżnij przycisk na podstawie wczytanych danych
+
                 messagebox.showinfo("Sukces", "Dane wczytane z pliku!")
+            except Exception as e:
+                messagebox.showerror("Błąd", f"Nie udało się wczytać pliku: {e}")
