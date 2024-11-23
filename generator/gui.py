@@ -97,6 +97,10 @@ class GUI:
 
     def group_constraints(self):
         """Grupuje identyczne ograniczenia w GUI."""
+        if hasattr(self, "constraints_grouped") and self.constraints_grouped:
+            messagebox.showinfo("Informacja", "Ograniczenia zostały już zgrupowane.")
+            return
+
         raw_constraints = self.limits_field.get("1.0", tk.END).strip()
         if not raw_constraints:
             messagebox.showinfo("Informacja", "Brak ograniczeń do grupowania.")
@@ -125,8 +129,10 @@ class GUI:
         self.limits_field.delete("1.0", tk.END)
         self.limits_field.insert(tk.END, "\n".join(grouped_constraints))
 
-        messagebox.showinfo("Sukces", "Ograniczenia zostały zgrupowane.")
+        # Ustaw flagę wskazującą, że ograniczenia zostały zgrupowane
+        self.constraints_grouped = True
 
+        messagebox.showinfo("Sukces", "Ograniczenia zostały zgrupowane.")
     def insert_text(self, value):
         """Wstawia tekst (symbol operacji) do aktywnego pola tekstowego."""
         active_widget = self.root.focus_get()
