@@ -7,7 +7,6 @@ def format_for_file(target, optimization, limits):
     target = convert_to_file_format(target)
     optimization = optimization.strip()
     limits = convert_to_file_format(limits)
-    # Format zapisu w pliku (bez pustych linii między ograniczeniami)
     return f"{optimization} {target}\n{limits}"
 
 
@@ -32,15 +31,9 @@ def convert_to_file_format(data):
     data = data.replace("∧", "&&")
     data = data.replace("∨", "||")
     data = data.replace("∈", "E")
-    data = data.replace("!", "!")
-    data = data.replace("=", "=")
-    data = data.replace("Z", "Z")
-    data = data.replace("R", "R")
-    data = data.replace("N", "N")
-    data = data.replace("(", "(")
-    data = data.replace(")", ")")
-    data = data.replace("{", "{")
-    data = data.replace("}", "}")
+
+    # Zamiana x3! na factorial(int(x[3]))
+    data = re.sub(r'x(\d+)!', r'factorial(int(x[\1]))', data)
 
     # Zamiana x0, x1, ... na x[0], x[1], ...
     data = re.sub(r'x(\d+)', r'x[\1]', data)
@@ -58,15 +51,9 @@ def convert_to_gui_format(data):
     data = data.replace("&&", "∧")
     data = data.replace("||", "∨")
     data = data.replace("E", "∈")
-    data = data.replace("!", "!")
-    data = data.replace("=", "=")
-    data = data.replace("Z", "Z")
-    data = data.replace("R", "R")
-    data = data.replace("N", "N")
-    data = data.replace("(", "(")
-    data = data.replace(")", ")")
-    data = data.replace("{", "{")
-    data = data.replace("}", "}")
+
+    # Zamiana factorial(int(x[3])) na x3!
+    data = re.sub(r'factorial\(int\(x\[(\d+)\]\)\)', r'x\1!', data)
 
     # Zamiana x[0], x[1], ... na x0, x1, ...
     data = re.sub(r'x\[(\d+)\]', r'x\1', data)
