@@ -120,6 +120,20 @@ class GUI:
             messagebox.showerror("Błąd", "Możesz wprowadzić maksymalnie 18 ograniczeń.")
             return
 
+        # Poprawiony regex do walidacji ograniczeń
+        invalid_constraints = []
+        for constraint in constraints:
+            # Sprawdza zarówno warunki logiczne, jak i przedziały
+            if not re.match(r'^x\d+\s*(>=|<=|>|<|=|∈)\s*(-?\d+(\.\d+)?|R|Z|N|<[^>]*>)$', constraint.strip()):
+                invalid_constraints.append(constraint)
+
+        if invalid_constraints:
+            messagebox.showerror(
+                "Błąd",
+                f"Następujące ograniczenia są nieprawidłowe:\n\n{', '.join(invalid_constraints)}"
+            )
+            return
+
         formatted_data = parser.format_for_file(target, optimization, limits)
         file_path = filedialog.asksaveasfilename(defaultextension=".txt",
                                                  filetypes=[("Text files", "*.txt")])
