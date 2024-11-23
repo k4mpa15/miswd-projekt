@@ -134,7 +134,7 @@ class GUI:
             return
 
         # Formatowanie danych do zapisu
-        formatted_data = f"{optimization} {parser.format_for_file(target)}\n{parser.format_for_file(limits)}"
+        formatted_data = parser.format_for_file(target, optimization, limits)
         file_path = filedialog.asksaveasfilename(defaultextension=".txt",
                                                  filetypes=[("Text files", "*.txt")])
         if file_path:
