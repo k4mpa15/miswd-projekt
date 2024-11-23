@@ -54,6 +54,9 @@ class GUI:
         tk.Button(root, text="Zapisz do pliku", font=("Arial", 10), command=self.save_to_file).pack(pady=5)
         tk.Button(root, text="Wczytaj z pliku", font=("Arial", 10), command=self.load_from_file).pack(pady=5)
 
+        # Przyciski dodatkowe
+        tk.Button(root, text="Grupuj ograniczenia", font=("Arial", 10), command=self.group_constraints).pack(pady=5)
+
     def create_buttons(self):
         """Tworzy przyciski z symbolami matematycznymi w układzie 5x5."""
         frame = tk.Frame(self.root)
@@ -92,6 +95,38 @@ class GUI:
         elif opt_type == "max":
             self.max_button.config(bg="lightblue")
 
+    def group_constraints(self):
+        """Grupuje identyczne ograniczenia w GUI."""
+        raw_constraints = self.limits_field.get("1.0", tk.END).strip()
+        if not raw_constraints:
+            messagebox.showinfo("Informacja", "Brak ograniczeń do grupowania.")
+            return
+
+        constraints = raw_constraints.splitlines()
+
+        grouped = {}
+        for constraint in constraints:
+            match = re.match(r"(x\d+)\s*(.*)", constraint.strip())
+            if match:
+                variable, condition = match.groups()
+                if condition not in grouped:
+                    grouped[condition] = []
+                grouped[condition].append(variable)
+            else:
+                grouped[constraint] = []
+
+        grouped_constraints = []
+        for condition, variables in grouped.items():
+            if variables:
+                grouped_constraints.append(f"{','.join(variables)} {condition}")
+            else:
+                grouped_constraints.append(condition)
+
+        self.limits_field.delete("1.0", tk.END)
+        self.limits_field.insert(tk.END, "\n".join(grouped_constraints))
+
+        messagebox.showinfo("Sukces", "Ograniczenia zostały zgrupowane.")
+
     def insert_text(self, value):
         """Wstawia tekst (symbol operacji) do aktywnego pola tekstowego."""
         active_widget = self.root.focus_get()
@@ -114,15 +149,23 @@ class GUI:
             messagebox.showerror("Błąd", "Funkcja celu może zawierać maksymalnie 10 zmiennych decyzyjnych.")
             return
 
-        # Weryfikacja liczby ograniczeń
-        constraints = limits.splitlines()
-        if len(constraints) > 18:  # Maksymalna liczba ograniczeń: 18
-            messagebox.showerror("Błąd", "Możesz wprowadzić maksymalnie 18 ograniczeń.")
-            return
+        # Rozdziel grupowane ograniczenia na pojedyncze linie
+        raw_constraints = limits.splitlines()
+        expanded_constraints = []
+
+        for constraint in raw_constraints:
+            match = re.match(r"((x\d+(,x\d+)*)\s*(∈|>=|<=|>|<|=)\s*.+)", constraint)
+            if match:
+                variables_part, _, _, condition = match.groups()
+                variables_list = variables_part.split(',')
+                for var in variables_list:
+                    expanded_constraints.append(f"{var.strip()} {condition.strip()}")
+            else:
+                expanded_constraints.append(constraint)
 
         # Walidacja ograniczeń
         invalid_constraints = []
-        for constraint in constraints:
+        for constraint in expanded_constraints:
             if not re.match(r'^x\d+\s*(>=|<=|>|<|=|∈)\s*(-?\d+(\.\d+)?|R|Z|N|<[^>]*>)$', constraint.strip()):
                 invalid_constraints.append(constraint)
 
@@ -133,14 +176,14 @@ class GUI:
             )
             return
 
-        # Formatowanie danych do zapisu
-        formatted_data = parser.format_for_file(target, optimization, limits)
+        # Przygotowanie danych do zapisu
+        expanded_limits = "\n".join(expanded_constraints)
+        formatted_data = parser.format_for_file(target, optimization, expanded_limits)
         file_path = filedialog.asksaveasfilename(defaultextension=".txt",
                                                  filetypes=[("Text files", "*.txt")])
         if file_path:
             data_handler.save_to_file(formatted_data, file_path)
             messagebox.showinfo("Sukces", "Dane zapisane do pliku!")
-
     def load_from_file(self):
         """Wczytuje dane z pliku i wypełnia pola w aplikacji."""
         file_path = filedialog.askopenfilename(filetypes=[("Text files", "*.txt")])
@@ -149,22 +192,20 @@ class GUI:
                 # Pobranie danych z pliku (krotka: target, optimization, limits)
                 target, optimization, limits = data_handler.load_from_file(file_path)
 
-                # Weryfikacja liczby ograniczeń
                 constraints = limits.splitlines()
                 if len(constraints) > 18:
                     messagebox.showerror("Błąd", "Plik zawiera więcej niż 18 ograniczeń.")
                     return
 
                 # Formatowanie danych do GUI
-                target_gui = parser.format_for_gui(target, optimization, limits)[0]
-                limits_gui = parser.format_for_gui(target, optimization, limits)[2]
+                target_gui, optimization_gui, limits_gui = parser.format_for_gui(target, optimization, limits)
 
                 # Wypełnienie pól w GUI
                 self.target_field.delete("1.0", tk.END)
                 self.limits_field.delete("1.0", tk.END)
                 self.target_field.insert(tk.END, target_gui)
                 self.limits_field.insert(tk.END, limits_gui)
-                self.set_optimization(optimization)  # Wyróżnij przycisk na podstawie wczytanych danych
+                self.set_optimization(optimization_gui)
 
                 messagebox.showinfo("Sukces", "Dane wczytane z pliku!")
             except Exception as e:
