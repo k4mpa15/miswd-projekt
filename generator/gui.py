@@ -154,14 +154,14 @@ class GUI:
         expanded_constraints = []
 
         for constraint in raw_constraints:
-            match = re.match(r"((x\d+(,x\d+)*)\s*(∈|>=|<=|>|<|=)\s*.+)", constraint)
+            match = re.match(r"((x\d+(,x\d+)*))\s*(∈|>=|<=|>|<|=)\s*(.+)", constraint.strip())
             if match:
-                variables_part, _, _, condition = match.groups()
+                variables_part, _, _, operator, condition = match.groups()
                 variables_list = variables_part.split(',')
                 for var in variables_list:
-                    expanded_constraints.append(f"{var.strip()} {condition.strip()}")
+                    expanded_constraints.append(f"{var.strip()} {operator.strip()} {condition.strip()}")
             else:
-                expanded_constraints.append(constraint)
+                expanded_constraints.append(constraint.strip())
 
         # Walidacja ograniczeń
         invalid_constraints = []
@@ -178,12 +178,21 @@ class GUI:
 
         # Przygotowanie danych do zapisu
         expanded_limits = "\n".join(expanded_constraints)
-        formatted_data = parser.format_for_file(target, optimization, expanded_limits)
+        try:
+            formatted_data = parser.format_for_file(target, optimization, expanded_limits)
+        except Exception as e:
+            messagebox.showerror("Błąd", f"Nie udało się sformatować danych: {e}")
+            return
+
+        # Wybór ścieżki i zapis do pliku
         file_path = filedialog.asksaveasfilename(defaultextension=".txt",
                                                  filetypes=[("Text files", "*.txt")])
         if file_path:
-            data_handler.save_to_file(formatted_data, file_path)
-            messagebox.showinfo("Sukces", "Dane zapisane do pliku!")
+            try:
+                data_handler.save_to_file(formatted_data, file_path)
+                messagebox.showinfo("Sukces", "Dane zapisane do pliku!")
+            except Exception as e:
+                messagebox.showerror("Błąd", f"Nie udało się zapisać pliku: {e}")
     def load_from_file(self):
         """Wczytuje dane z pliku i wypełnia pola w aplikacji."""
         file_path = filedialog.askopenfilename(filetypes=[("Text files", "*.txt")])
