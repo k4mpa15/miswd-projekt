@@ -55,13 +55,18 @@ def podziel_ograniczenia(ograniczenia):
 
     return standardowe_ograniczenia, specjalne_ograniczenia
 def wymus_calkowitosc(x, specjalne_ograniczenia):
+    
+    x = list(x)  
+
     calkowite_pattern = r"x\[(\d+)\] *E *Z"
     
     for ograniczenie in specjalne_ograniczenia:
         match = re.match(calkowite_pattern, ograniczenie)
         if match:
             zmienna_idx = int(match.group(1))
-            x[zmienna_idx] = round(x[zmienna_idx])  
+            x[zmienna_idx] = int(round(x[zmienna_idx]))       
+    return x
+
 
 
 def rozwiaz_ograniczenia_przedzialowe(ograniczenia):
@@ -74,29 +79,28 @@ def rozwiaz_ograniczenia_przedzialowe(ograniczenia):
 
     for ograniczenie in ograniczenia:
         if re.match(rzeczywiste_pattern, ograniczenie):
-           
             continue
         
         match_przedzial = re.match(przedzial_pattern_p, ograniczenie)
         if match_przedzial:
-            lower_bound = float(match_przedzial.group(1))  
+            lower_bound = int(match_przedzial.group(1))  
             zmienna_idx = int(match_przedzial.group(2))  
-            upper_bound = float(match_przedzial.group(3))  
+            upper_bound = int(match_przedzial.group(3))  
 
-            nowe_ograniczenia.append(f"x[{zmienna_idx}] > {lower_bound}")
-            nowe_ograniczenia.append(f"x[{zmienna_idx}] < {upper_bound}")
+            nowe_ograniczenia.append(f"x[{zmienna_idx}] >= {lower_bound}")
+            nowe_ograniczenia.append(f"x[{zmienna_idx}] <= {upper_bound}")
         else:
             match = re.match(przedzial_pattern, ograniczenie)
             if match:
                 zmienna_idx = int(match.group(1))
                 modulo = match.group(2)
-                dolna_granica = float(match.group(3))
-                gorna_granica = float(match.group(4))
+                dolna_granica = int(match.group(3))
+                gorna_granica = int(match.group(4))
 
                 if modulo:
                     modulo_value = modulo.split('%')[1].strip()
-                    nowe_ograniczenia.append(f"x[{zmienna_idx}] % {modulo_value} > {dolna_granica}")
-                    nowe_ograniczenia.append(f"x[{zmienna_idx}] % {modulo_value} < {gorna_granica}")
+                    nowe_ograniczenia.append(f"x[{zmienna_idx}] % {modulo_value} >= {dolna_granica}")
+                    nowe_ograniczenia.append(f"x[{zmienna_idx}] % {modulo_value} <= {gorna_granica}")
                 else:
                     nowe_ograniczenia.append(f"x[{zmienna_idx}] >= {dolna_granica}")
                     nowe_ograniczenia.append(f"x[{zmienna_idx}] <= {gorna_granica}")
@@ -106,8 +110,8 @@ def rozwiaz_ograniczenia_przedzialowe(ograniczenia):
                     zmienna_idx_1 = int(match_mnozenie.group(1))                    
                     zmienna_idx_2 = int(match_mnozenie.group(2))                    
                     zmienna_idx_3 = int(match_mnozenie.group(3))                     
-                    lower_bound = float(match_mnozenie.group(4))  
-                    upper_bound = float(match_mnozenie.group(5))  
+                    lower_bound = int(match_mnozenie.group(4))  
+                    upper_bound = int(match_mnozenie.group(5))  
 
                     nowe_ograniczenia.append(f"x[{zmienna_idx_1}] * x[{zmienna_idx_2}] * x[{zmienna_idx_3}] > {lower_bound}")
                     nowe_ograniczenia.append(f"x[{zmienna_idx_1}] * x[{zmienna_idx_2}] * x[{zmienna_idx_3}] < {upper_bound}")
@@ -161,7 +165,7 @@ def wymus_ograniczenia(x, ograniczenia):
                         x[idx2] /= factor
                         x[idx3] /= factor
             if not eval(ograniczenie):
-                
+                wartosc_zmiany = 1e-6
                 if ">=" in ograniczenie:
                     zmienna, wartosc = ograniczenie.split(">=")
                     zmienna_idx = int(re.search(r"\[(\d+)\]", zmienna).group(1))
@@ -173,16 +177,16 @@ def wymus_ograniczenia(x, ograniczenia):
                 elif "<" in ograniczenie:
                     zmienna, wartosc = ograniczenie.split("<")
                     zmienna_idx = int(re.search(r"\[(\d+)\]", zmienna).group(1))
-                    x[zmienna_idx] = min(x[zmienna_idx], float(wartosc) - 1e-6)
+                    x[zmienna_idx] = min(x[zmienna_idx], float(wartosc) - wartosc_zmiany)
                 elif ">" in ograniczenie:
                     zmienna, wartosc = ograniczenie.split(">")
                     zmienna_idx = int(re.search(r"\[(\d+)\]", zmienna).group(1))
-                    x[zmienna_idx] = max(x[zmienna_idx], float(wartosc) + 1e-6)
+                    x[zmienna_idx] = max(x[zmienna_idx], float(wartosc) + wartosc_zmiany)
                 elif "!=" in ograniczenie:
                     zmienna, wartosc = ograniczenie.split("!=")
                     zmienna_idx = int(re.search(r"\[(\d+)\]", zmienna).group(1))
-                    if abs(x[zmienna_idx] - float(wartosc)) < 1e-6:
-                        x[zmienna_idx] += 1e-6
+                    if abs(x[zmienna_idx] - float(wartosc)) < wartosc_zmiany:
+                        x[zmienna_idx] += wartosc_zmiany
                 elif "==" in ograniczenie:
                     zmienna, wartosc = ograniczenie.split("==")
                     zmienna_idx = int(re.search(r"\[(\d+)\]", zmienna).group(1))
@@ -194,14 +198,14 @@ def wymus_ograniczenia(x, ograniczenia):
                     if "!=" in reszta:
                         modulo, wartosc = map(str.strip, reszta.split("!="))  
                         modulo = int(modulo)
-                        wartosc = float(wartosc)  
+                        wartosc = int(wartosc)  
                         if x[zmienna_idx] % modulo == wartosc:
                             x[zmienna_idx] += 1  
 
                     elif ">=" in reszta:
                         modulo, wartosc = map(str.strip, reszta.split(">="))  
                         modulo = int(modulo)
-                        wartosc = float(wartosc)  
+                        wartosc = int(wartosc)  
                         
                         if x[zmienna_idx] % modulo < wartosc:
                             x[zmienna_idx] += (wartosc - (x[zmienna_idx] % modulo)) % modulo
@@ -209,7 +213,7 @@ def wymus_ograniczenia(x, ograniczenia):
                     elif "<=" in reszta:
                         modulo, wartosc = map(str.strip, reszta.split("<="))  
                         modulo = int(modulo)
-                        wartosc = float(wartosc) 
+                        wartosc = int(wartosc) 
                         
                         if x[zmienna_idx] % modulo > wartosc:
                             x[zmienna_idx] -= (x[zmienna_idx] % modulo - wartosc) % modulo
@@ -217,7 +221,7 @@ def wymus_ograniczenia(x, ograniczenia):
                     elif ">" in reszta:
                         modulo, wartosc = map(str.strip, reszta.split(">")) 
                         modulo = int(modulo)
-                        wartosc = float(wartosc)  
+                        wartosc = int(wartosc)  
                        
                         if x[zmienna_idx] % modulo <= wartosc:
                             x[zmienna_idx] += (wartosc - (x[zmienna_idx] % modulo)) % modulo
@@ -225,14 +229,14 @@ def wymus_ograniczenia(x, ograniczenia):
                     elif "<" in reszta:
                         modulo, wartosc = map(str.strip, reszta.split("<"))  
                         modulo = int(modulo)
-                        wartosc = float(wartosc)  
+                        wartosc = int(wartosc)  
                         if x[zmienna_idx] % modulo >= wartosc:
                             x[zmienna_idx] -= (x[zmienna_idx] % modulo - wartosc) % modulo
 
                     elif "==" in reszta:
                         modulo, wartosc = map(str.strip, reszta.split("=="))  
                         modulo = int(modulo)
-                        wartosc = float(wartosc)  
+                        wartosc = int(wartosc)  
                        
                         x[zmienna_idx] = x[zmienna_idx] - (x[zmienna_idx] % modulo) + wartosc
         except Exception as e:
@@ -289,7 +293,7 @@ def solve_problem(cel, funkcja_celu, ograniczenia, n_starts=10):
     """
     
     num_vars = get_variable_count(funkcja_celu, ograniczenia)
-    ograniczenia, specialne_ograniczenia = rozwiaz_ograniczenia_przedzialowe(ograniczenia)
+    ograniczenia, specjalne_ograniczenia = rozwiaz_ograniczenia_przedzialowe(ograniczenia)
 
     if cel == "max":
         funkcja_celu = f"-({funkcja_celu})"
@@ -307,39 +311,65 @@ def solve_problem(cel, funkcja_celu, ograniczenia, n_starts=10):
 
         if (cel == "min" and wynik < najlepszy_wynik) or (cel == "max" and wynik > najlepszy_wynik):
             najlepszy_wynik = wynik
-            najlepsze_rozwiazanie = x
-
-    x = wymus_calkowitosc(najlepsze_rozwiazanie, specialne_ograniczenia)
-
-    ograniczenia_wyniki = sprawdz_ograniczenia(najlepsze_rozwiazanie, ograniczenia, specialne_ograniczenia)
+            najlepsze_rozwiazanie = x.copy()  
     
-    return najlepsze_rozwiazanie, najlepszy_wynik, ograniczenia_wyniki
+    najlepsze_rozwiazanie = wymus_calkowitosc(najlepsze_rozwiazanie, specjalne_ograniczenia)
+    x, ograniczenia_wyniki = sprawdz_ograniczenia(najlepsze_rozwiazanie, ograniczenia, specjalne_ograniczenia)
+    
+    return x, najlepszy_wynik, ograniczenia_wyniki
 
 
-def sprawdz_ograniczenia(x, ograniczenia, specialne_ograniczenia):
-    print(ograniczenia)
-    print(specialne_ograniczenia)
+
+def sprawdz_ograniczenia(x, ograniczenia, specialne_ograniczenia, max_iter=10):
+    """
+    Sprawdza, czy rozwiązanie spełnia wszystkie ograniczenia, i wymusza je w razie potrzeby.
+    """
     niespelnione_ograniczenia = []
-    for ograniczenie in ograniczenia:
-        try:
-            spełnione = eval(ograniczenie)
-            if not spełnione:
-                niespelnione_ograniczenia.append(ograniczenie)
-        except Exception as e:
-            niespelnione_ograniczenia.append(f"Błąd w ograniczeniu '{ograniczenie}': {e}")
-            
-    for ograniczenie in specialne_ograniczenia:
-        if "E Z" in ograniczenie:
+    iteracja = 0
+    while iteracja < max_iter:
+        x = wymus_calkowitosc(x, specialne_ograniczenia)
+        niespelnione_ograniczenia = []
+        for ograniczenie in ograniczenia:
             try:
-                match = re.match(r"x\[(\d+)\] *E *Z", ograniczenie)
-                if match:
-                    zmienna_idx = int(match.group(1))
-                    if not float(x[zmienna_idx]).is_integer():
-                        niespelnione_ograniczenia.append(ograniczenie)
+                spełnione = eval(ograniczenie)
+                if not spełnione:
+                    niespelnione_ograniczenia.append(ograniczenie)
             except Exception as e:
                 niespelnione_ograniczenia.append(f"Błąd w ograniczeniu '{ograniczenie}': {e}")
-             
-    return niespelnione_ograniczenia
+
+        for ograniczenie in specialne_ograniczenia:
+            if "E Z" in ograniczenie:
+                try:
+                    match = re.match(r"x\[(\d+)\] *E *Z", ograniczenie)
+                    if match:
+                        zmienna_idx = int(match.group(1))
+                        if not math.isclose(x[zmienna_idx], round(x[zmienna_idx]), rel_tol=1e-9):
+                            niespelnione_ograniczenia.append(ograniczenie)
+                except Exception as e:
+                    niespelnione_ograniczenia.append(f"Błąd w ograniczeniu '{ograniczenie}': {e}")
+
+
+        if not niespelnione_ograniczenia:
+            break
+        standardowe_ograniczenia, specjalne_ograniczenia = podziel_ograniczenia(niespelnione_ograniczenia) 
+        
+        print(standardowe_ograniczenia)
+        # Wymuś niespełnione ograniczenia
+        for ograniczenie in standardowe_ograniczenia:
+            print("wejscie 2")
+            if isinstance(ograniczenie, list):  # Jeśli ograniczenie jest listą, iteruj przez jej elementy
+                for pod_ograniczenie in ograniczenie:
+                    x = wymus_ograniczenia(x, [pod_ograniczenie])  
+                    x = wymus_calkowitosc(x, specjalne_ograniczenia)
+            else:  # Jeśli ograniczenie jest stringiem, przekaż je bezpośrednio
+                x = wymus_ograniczenia(x, [ograniczenie])
+                x = wymus_calkowitosc(x, specjalne_ograniczenia)
+         
+        iteracja = iteracja + 1
+
+    if iteracja == max_iter:
+        print("Osiągnięto maksymalną liczbę iteracji podczas wymuszania ograniczeń.")
+    return x, niespelnione_ograniczenia
 
 
 
