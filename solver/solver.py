@@ -64,7 +64,7 @@ def wymus_calkowitosc(x, specjalne_ograniczenia):
         match = re.match(calkowite_pattern, ograniczenie)
         if match:
             zmienna_idx = int(match.group(1))
-            x[zmienna_idx] = int(round(x[zmienna_idx]))       
+            x[zmienna_idx] = int(round(x[zmienna_idx] + 1) )   
     return x
 
 
