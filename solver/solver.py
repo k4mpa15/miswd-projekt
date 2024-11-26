@@ -132,6 +132,30 @@ def wymus_ograniczenia(x, ograniczenia):
    
     for ograniczenie in ograniczenia:
         try:
+            match_factorial = re.search(r"factorial\(x\[(\d+)\]\s*(?:\+x\[(\d+)\])*\)\s*([><=!]+)\s*([\d.]+)", ograniczenie)
+            if match_factorial:
+                indices = [int(match_factorial.group(i)) for i in range(1, 4) if match_factorial.group(i)]
+                operator = match_factorial.group(len(indices) + 1)
+                value = float(match_factorial.group(len(indices) + 2))
+
+                suma = sum(x[idx] for idx in indices)
+                wynik_factorial = math.factorial(int(round(suma)))
+
+                if operator == "<=" and wynik_factorial > value:
+                    suma = math.floor(math.log(value, math.e))  
+                elif operator == ">=" and wynik_factorial < value:
+                    suma = math.ceil(math.log(value, math.e))
+                elif operator == ">" and wynik_factorial <= value:
+                    suma = math.ceil(math.log(value, math.e))
+                elif operator == "<" and wynik_factorial >= value:
+                    suma = math.floor(math.log(value, math.e))
+                elif operator == "==" and wynik_factorial != value:
+                    suma = math.log(value, math.e)
+
+                dzielona_wartosc = suma / len(indices)
+                for idx in indices:
+                    x[idx] = dzielona_wartosc
+                continue  
             match = re.match(r"x\[(\d+)\] \* x\[(\d+)\] \* x\[(\d+)\] ([><]=?) ([\d.]+)", ograniczenie)
             if match:
                 idx1, idx2, idx3, operator, value = match.groups()
@@ -324,7 +348,7 @@ def sprawdz_ograniczenia(x, ograniczenia, specialne_ograniczenia, max_iter=10):
     niespelnione_ograniczenia = []
     iteracja = 0
     while iteracja < max_iter:
-        x = wymus_calkowitosc(x, specialne_ograniczenia)
+    
         niespelnione_ograniczenia = []
         for ograniczenie in ograniczenia:
             try:
@@ -351,16 +375,13 @@ def sprawdz_ograniczenia(x, ograniczenia, specialne_ograniczenia, max_iter=10):
         standardowe_ograniczenia, specjalne_ograniczenia = podziel_ograniczenia(niespelnione_ograniczenia) 
         
         print(standardowe_ograniczenia)
-        # Wymuś niespełnione ograniczenia
         for ograniczenie in standardowe_ograniczenia:
             print("wejscie 2")
-            if isinstance(ograniczenie, list):  # Jeśli ograniczenie jest listą, iteruj przez jej elementy
+            if isinstance(ograniczenie, list):  
                 for pod_ograniczenie in ograniczenie:
                     x = wymus_ograniczenia(x, [pod_ograniczenie])  
-                    x = wymus_calkowitosc(x, specjalne_ograniczenia)
-            else:  # Jeśli ograniczenie jest stringiem, przekaż je bezpośrednio
+            else:  
                 x = wymus_ograniczenia(x, [ograniczenie])
-                x = wymus_calkowitosc(x, specjalne_ograniczenia)
          
         iteracja = iteracja + 1
 
