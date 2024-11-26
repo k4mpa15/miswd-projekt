@@ -291,7 +291,6 @@ def solve_problem(cel, funkcja_celu, ograniczenia, n_starts=10):
     """
     Główna funkcja rozwiązująca problem optymalizacji z wykorzystaniem najmniejszego spadku.
     """
-    
     num_vars = get_variable_count(funkcja_celu, ograniczenia)
     ograniczenia, specjalne_ograniczenia = rozwiaz_ograniczenia_przedzialowe(ograniczenia)
 
@@ -311,14 +310,12 @@ def solve_problem(cel, funkcja_celu, ograniczenia, n_starts=10):
 
         if (cel == "min" and wynik < najlepszy_wynik) or (cel == "max" and wynik > najlepszy_wynik):
             najlepszy_wynik = wynik
-            najlepsze_rozwiazanie = x.copy()  
-    
+            najlepsze_rozwiazanie = x.copy()
+
     najlepsze_rozwiazanie = wymus_calkowitosc(najlepsze_rozwiazanie, specjalne_ograniczenia)
     x, ograniczenia_wyniki = sprawdz_ograniczenia(najlepsze_rozwiazanie, ograniczenia, specjalne_ograniczenia)
-    
+
     return x, najlepszy_wynik, ograniczenia_wyniki
-
-
 
 def sprawdz_ograniczenia(x, ograniczenia, specialne_ograniczenia, max_iter=10):
     """
