@@ -277,10 +277,8 @@ def wymus_ograniczenia(x, ograniczenia):
 
 
 
-def najmniejszy_spadek(funkcja_celu, x, ograniczenia, max_iter=1000, tolerance=1e-6):
-    """
-    Metoda najmniejszego spadku (steepest descent) z dynamicznym dostosowaniem kroku.
-    """
+def najwiekszy_spadek(funkcja_celu, x, ograniczenia, max_iter=1000, tolerance=1e-6):
+
     for iteracja in range(max_iter):
         gradient = oblicz_gradient(funkcja_celu, x)
         if np.linalg.norm(gradient) < tolerance:  
@@ -318,9 +316,6 @@ def znajdz_krok(funkcja_celu, x, gradient, ograniczenia, max_krok=1.0, min_krok=
 
 
 def solve_problem(cel, funkcja_celu, ograniczenia, n_starts=10):
-    """
-    Główna funkcja rozwiązująca problem optymalizacji z wykorzystaniem najmniejszego spadku.
-    """
     num_vars = get_variable_count(funkcja_celu, ograniczenia)
     ograniczenia, specjalne_ograniczenia = rozwiaz_ograniczenia_przedzialowe(ograniczenia)
 
@@ -334,7 +329,7 @@ def solve_problem(cel, funkcja_celu, ograniczenia, n_starts=10):
         x = np.random.uniform(low=0, high=1, size=num_vars) * 10
         x = wymus_ograniczenia(x, ograniczenia)
 
-        x = najmniejszy_spadek(funkcja_celu, x, ograniczenia)
+        x = najwiekszy_spadek(funkcja_celu, x, ograniczenia)
         wynik = oblicz_funkcje_celu(funkcja_celu, x)
         wynik = -wynik if cel == "max" else wynik
 
