@@ -30,7 +30,12 @@ def solve():
     x, wynik, czy_spelnione = solve_problem(cel, funkcja_celu, ograniczenia)
     solution_text.insert(tk.END, f"Rozwiązanie: {x}\n")
     solution_text.insert(tk.END, f"Funkcja celu: {wynik}\n\n")
-    solution_text.insert(tk.END, f"Ograniczenia niespełnione: {czy_spelnione}\n")
+    
+    if czy_spelnione:
+        
+        solution_text.insert(tk.END, f"Ograniczenia niespełnione: {czy_spelnione} - rozwiazanie niedopuszczone\n")
+    else:
+        solution_text.insert(tk.END, f"Ograniczenia niespełnione: {czy_spelnione}\n")
 
 def erase():
     solution_text.delete(1.0, tk.END)
