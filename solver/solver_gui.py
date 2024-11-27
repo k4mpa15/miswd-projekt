@@ -48,7 +48,6 @@ root.geometry("800x600")
 root.configure(bg="#2E2E2E")  
 
 
-# Ramka na przyciski
 button_frame = tk.Frame(root, bg="#2E2E2E")
 button_frame.pack(pady=10, fill=tk.X)
 
@@ -64,11 +63,11 @@ get_file_button = tk.Button(
     padx=10,
     pady=5
 )
-get_file_button.pack(side=tk.LEFT, padx=10)  # Wyrównanie do lewej strony
+get_file_button.pack(side=tk.LEFT, padx=10) 
 
 algorithm_1_button = tk.Button(
     button_frame, 
-    text="Metoda najmniejszego spadku", 
+    text="Metoda najszybszego spadku", 
     command=solve, 
     bg="#4A90E2", 
     fg="white", 
@@ -92,7 +91,7 @@ erase_button = tk.Button(
     padx=10,
     pady=5
 )
-erase_button.pack(side=tk.LEFT, padx=10)  # Obok przycisku "Metoda najmniejszego spadku"
+erase_button.pack(side=tk.LEFT, padx=10)  
 
 
 eq_text = tk.Text(root, width=150, height=15, bg="#1E1E1E", fg="white", insertbackground="white", bd=0)

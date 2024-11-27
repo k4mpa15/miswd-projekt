@@ -298,10 +298,7 @@ def najwiekszy_spadek(funkcja_celu, x, ograniczenia, max_iter=1000, tolerance=1e
     return x
 
 
-def znajdz_krok(funkcja_celu, x, gradient, ograniczenia, max_krok=1.0, min_krok=1e-6, beta=0.5):
-    """
-    Metoda wyszukiwania kroku (line search) przy użyciu metody backtracking.
-    """
+def znajdz_krok(funkcja_celu, x, gradient, ograniczenia, max_krok=1.0, min_krok=1e-6, beta=0.5):  
     alpha = max_krok 
     while alpha > min_krok:
         x_test = x - alpha * gradient
@@ -343,9 +340,6 @@ def solve_problem(cel, funkcja_celu, ograniczenia, n_starts=10):
     return x, najlepszy_wynik, ograniczenia_wyniki
 
 def sprawdz_ograniczenia(x, ograniczenia, specialne_ograniczenia, max_iter=10):
-    """
-    Sprawdza, czy rozwiązanie spełnia wszystkie ograniczenia, i wymusza je w razie potrzeby.
-    """
     niespelnione_ograniczenia = []
     iteracja = 0
     while iteracja < max_iter:
