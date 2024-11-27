@@ -73,7 +73,7 @@ algorithm_1_button = tk.Button(
     padx=10,
     pady=5
 )
-algorithm_1_button.pack(side=tk.LEFT, padx=10)  # Obok przycisku "Wczytaj plik"
+algorithm_1_button.pack(side=tk.LEFT, padx=10)  
 
 erase_button = tk.Button(
     button_frame, 

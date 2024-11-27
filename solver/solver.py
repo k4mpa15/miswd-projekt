@@ -2,6 +2,8 @@ import re
 import numpy as np
 import math  
 
+cel = min
+
 def get_variable_count(funkcja_celu, ograniczenia):
     pattern = r"x\[(\d+)\]"  
     all_matches = re.findall(pattern, funkcja_celu)  
@@ -14,6 +16,7 @@ def process_data(data):
     linie = data.strip().split("\n")
     pierwsza_linia = linie[0].split(" ")
 
+    global cel 
     cel = pierwsza_linia[0]  
     funkcja_celu = pierwsza_linia[1]  
 
@@ -55,16 +58,19 @@ def podziel_ograniczenia(ograniczenia):
 
     return standardowe_ograniczenia, specjalne_ograniczenia
 def wymus_calkowitosc(x, specjalne_ograniczenia):
-    
+    global cel
     x = list(x)  
-
+    print(cel)
     calkowite_pattern = r"x\[(\d+)\] *E *Z"
     
     for ograniczenie in specjalne_ograniczenia:
         match = re.match(calkowite_pattern, ograniczenie)
         if match:
             zmienna_idx = int(match.group(1))
-            x[zmienna_idx] = int(round(x[zmienna_idx] + 1) )   
+            if cel == "max":
+                x[zmienna_idx] = int(round(x[zmienna_idx] + 1) )   
+            elif cel == "min":
+                x[zmienna_idx] = int(round(x[zmienna_idx]) )  
     return x
 
 
@@ -387,6 +393,20 @@ def sprawdz_ograniczenia(x, ograniczenia, specialne_ograniczenia, max_iter=10):
 
     if iteracja == max_iter:
         print("Osiągnięto maksymalną liczbę iteracji podczas wymuszania ograniczeń.")
+    for ograniczenie in list(niespelnione_ograniczenia):  
+        try:
+            match = re.findall(r"x\[(\d+)\]", ograniczenie)
+            if match:
+                for zmienna_idx in map(int, match):
+                    x[zmienna_idx] -= 1
+                    if eval(ograniczenie):
+                        niespelnione_ograniczenia.remove(ograniczenie)  
+                        break  
+                    
+                    x[zmienna_idx] += 1
+        except Exception as e:
+            print(f"Błąd podczas przetwarzania ograniczenia: {ograniczenie}")
+            print(f"Szczegóły błędu: {e}")
     return x, niespelnione_ograniczenia
 
 
