@@ -8,7 +8,7 @@ import re
 class GUI:
     def __init__(self, root):
         self.root = root
-        self.root.title("Generator Równań")
+        self.root.title("Konwerter Równań")
 
         # Ustawienia ogólne rozmiaru
         self.root.geometry("600x750")  # Ustawienie większego rozmiaru okna
@@ -139,64 +139,43 @@ class GUI:
 
     def save_to_file(self):
         """Zapisuje dane do pliku w odpowiednim formacie."""
+        # Pobranie danych z GUI
         target = self.target_field.get("1.0", tk.END).strip()
         optimization = self.optimization_type.get().strip()
         limits = self.limits_field.get("1.0", tk.END).strip()
 
+        # Sprawdzenie, czy typ optymalizacji jest ustawiony
         if not optimization:
-            messagebox.showerror("Błąd", "Wybierz typ (Min lub Max).")
+            messagebox.showerror("Błąd", "Wybierz typ optymalizacji (Min lub Max).")
             return
 
-        # Usuwanie spacji w funkcji celu
+        # Usuwanie zbędnych spacji z funkcji celu
         target_no_spaces = re.sub(r'\s+', '', target)
 
-        # Weryfikacja liczby zmiennych decyzyjnych
-        variables = re.findall(r'x\d+', target_no_spaces)  # Szuka zmiennych decyzyjnych w funkcji celu
+        # Walidacja liczby zmiennych decyzyjnych w funkcji celu
+        variables = re.findall(r'x\d+', target_no_spaces)
         if len(set(variables)) > 10:
             messagebox.showerror("Błąd", "Funkcja celu może zawierać maksymalnie 10 zmiennych decyzyjnych.")
             return
 
-        # Rozdziel grupowane ograniczenia na pojedyncze linie
-        raw_constraints = limits.splitlines()
-        expanded_constraints = []
-
-        for constraint in raw_constraints:
-            match = re.match(r"((x\d+(,x\d+)*))\s*(∈|>=|<=|>|<|=)\s*(.+)", constraint.strip())
-            if match:
-                variables_part, _, _, operator, condition = match.groups()
-                variables_list = variables_part.split(',')
-                for var in variables_list:
-                    expanded_constraints.append(f"{var.strip()} {operator.strip()} {condition.strip()}")
-            else:
-                expanded_constraints.append(constraint.strip())
-
-        # Walidacja ograniczeń
-        invalid_constraints = []
-        for constraint in expanded_constraints:
-            if not re.match(r'^x\d+\s*(>=|<=|>|<|=|∈)\s*(-?\d+(\.\d+)?|R|Z|N|<[^>]*>)$', constraint.strip()):
-                invalid_constraints.append(constraint)
-
-        if invalid_constraints:
-            messagebox.showerror(
-                "Błąd",
-                f"Następujące ograniczenia są nieprawidłowe:\n\n{', '.join(invalid_constraints)}"
-            )
-            return
-
-        # Przygotowanie danych do zapisu
-        expanded_limits = "\n".join(expanded_constraints)
+        # Walidacja i formatowanie ograniczeń
         try:
-            formatted_data = parser.format_for_file(target_no_spaces, optimization, expanded_limits)
+            # Konwersja ograniczeń na format plikowy
+            formatted_limits = parser.convert_to_file_format(limits)
+            formatted_target = parser.convert_to_file_format(target_no_spaces)
+            formatted_data = f"{optimization} {formatted_target}\n{formatted_limits}"
         except Exception as e:
             messagebox.showerror("Błąd", f"Nie udało się sformatować danych: {e}")
             return
 
-        # Wybór ścieżki i zapis do pliku
+        # Wybór lokalizacji zapisu pliku
         file_path = filedialog.asksaveasfilename(defaultextension=".txt",
                                                  filetypes=[("Text files", "*.txt")])
         if file_path:
             try:
-                data_handler.save_to_file(formatted_data, file_path)
+                # Zapis danych do pliku
+                with open(file_path, "w", encoding="utf-8") as file:
+                    file.write(formatted_data)
                 messagebox.showinfo("Sukces", "Dane zapisane do pliku!")
             except Exception as e:
                 messagebox.showerror("Błąd", f"Nie udało się zapisać pliku: {e}")
