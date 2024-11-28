@@ -336,7 +336,10 @@ def solve_problem(cel, funkcja_celu, ograniczenia, n_starts=10):
 
     najlepsze_rozwiazanie = wymus_calkowitosc(najlepsze_rozwiazanie, specjalne_ograniczenia)
     x, ograniczenia_wyniki = sprawdz_ograniczenia(najlepsze_rozwiazanie, ograniczenia, specjalne_ograniczenia)
-
+    if (cel == "min") :
+        najlepszy_wynik = oblicz_funkcje_celu(funkcja_celu, x)
+    elif cel == "max":
+        najlepszy_wynik = oblicz_funkcje_celu(funkcja_celu, x) * -1
     return x, najlepszy_wynik, ograniczenia_wyniki
 
 def sprawdz_ograniczenia(x, ograniczenia, specialne_ograniczenia, max_iter=10):
