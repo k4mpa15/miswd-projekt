@@ -38,7 +38,7 @@ class GUI:
         self.max_button.pack(side=tk.LEFT, padx=5)
 
         tk.Label(root, text="przy ograniczeniach:", font=("Arial", 10, "bold")).pack(pady=5)
-        tk.Label(root, text="(Max. 18 ograniczeń)", font=("Arial", 8)).pack(pady=2)
+        tk.Label(root, text="(Max. 50 ograniczeń)", font=("Arial", 8)).pack(pady=2)
         limits_frame = tk.Frame(root)
         limits_frame.pack(pady=5)
         self.limits_scroll = tk.Scrollbar(limits_frame, orient=tk.VERTICAL)
@@ -206,8 +206,8 @@ class GUI:
                 target, optimization, limits = data_handler.load_from_file(file_path)
 
                 constraints = limits.splitlines()
-                if len(constraints) > 18:
-                    messagebox.showerror("Błąd", "Plik zawiera więcej niż 18 ograniczeń.")
+                if len(constraints) > 50:
+                    messagebox.showerror("Błąd", "Plik zawiera więcej niż 50 ograniczeń.")
                     return
 
                 # Formatowanie danych do GUI
