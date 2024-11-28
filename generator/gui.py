@@ -147,8 +147,11 @@ class GUI:
             messagebox.showerror("Błąd", "Wybierz typ (Min lub Max).")
             return
 
+        # Usuwanie spacji w funkcji celu
+        target_no_spaces = re.sub(r'\s+', '', target)
+
         # Weryfikacja liczby zmiennych decyzyjnych
-        variables = re.findall(r'x\d+', target)  # Szuka zmiennych decyzyjnych w funkcji celu
+        variables = re.findall(r'x\d+', target_no_spaces)  # Szuka zmiennych decyzyjnych w funkcji celu
         if len(set(variables)) > 10:
             messagebox.showerror("Błąd", "Funkcja celu może zawierać maksymalnie 10 zmiennych decyzyjnych.")
             return
@@ -183,7 +186,7 @@ class GUI:
         # Przygotowanie danych do zapisu
         expanded_limits = "\n".join(expanded_constraints)
         try:
-            formatted_data = parser.format_for_file(target, optimization, expanded_limits)
+            formatted_data = parser.format_for_file(target_no_spaces, optimization, expanded_limits)
         except Exception as e:
             messagebox.showerror("Błąd", f"Nie udało się sformatować danych: {e}")
             return
@@ -197,6 +200,7 @@ class GUI:
                 messagebox.showinfo("Sukces", "Dane zapisane do pliku!")
             except Exception as e:
                 messagebox.showerror("Błąd", f"Nie udało się zapisać pliku: {e}")
+
     def load_from_file(self):
         """Wczytuje dane z pliku i wypełnia pola w aplikacji."""
         file_path = filedialog.askopenfilename(filetypes=[("Text files", "*.txt")])
@@ -205,13 +209,17 @@ class GUI:
                 # Pobranie danych z pliku (krotka: target, optimization, limits)
                 target, optimization, limits = data_handler.load_from_file(file_path)
 
+                # Zamiana factorial(...) na (...)! oraz usuwanie spacji
+                target_no_spaces = re.sub(r'\s+', '', target)
+                limits = re.sub(r'factorial\s*\(\s*(.*?)\s*\)', r'(\1)!', limits)
+
                 constraints = limits.splitlines()
                 if len(constraints) > 50:
                     messagebox.showerror("Błąd", "Plik zawiera więcej niż 50 ograniczeń.")
                     return
 
                 # Formatowanie danych do GUI
-                target_gui, optimization_gui, limits_gui = parser.format_for_gui(target, optimization, limits)
+                target_gui, optimization_gui, limits_gui = parser.format_for_gui(target_no_spaces, optimization, limits)
 
                 # Wypełnienie pól w GUI
                 self.target_field.delete("1.0", tk.END)
