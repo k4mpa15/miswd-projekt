@@ -95,9 +95,9 @@ class GUI:
 
     def group_constraints(self):
         """Grupuje identyczne ograniczenia w GUI."""
-        if hasattr(self, "constraints_grouped") and self.constraints_grouped:
-            messagebox.showinfo("Informacja", "Ograniczenia zostały już zgrupowane.")
-            return
+        # Pobierz oryginalne ograniczenia i zapisz do zmiennej, jeśli jeszcze nie są zapisane
+        if not hasattr(self, "original_constraints") or not self.original_constraints:
+            self.original_constraints = self.limits_field.get("1.0", tk.END).strip()
 
         raw_constraints = self.limits_field.get("1.0", tk.END).strip()
         if not raw_constraints:
@@ -105,8 +105,8 @@ class GUI:
             return
 
         constraints = raw_constraints.splitlines()
-
         grouped = {}
+
         for constraint in constraints:
             match = re.match(r"(x\d+)\s*(.*)", constraint.strip())
             if match:
@@ -127,32 +127,28 @@ class GUI:
         self.limits_field.delete("1.0", tk.END)
         self.limits_field.insert(tk.END, "\n".join(grouped_constraints))
 
-        # Ustaw flagę wskazującą, że ograniczenia zostały zgrupowane
-        self.constraints_grouped = True
-
+        # Informacja o sukcesie grupowania
         messagebox.showinfo("Sukces", "Ograniczenia zostały zgrupowane.")
-    def insert_text(self, value):
-        """Wstawia tekst (symbol operacji) do aktywnego pola tekstowego."""
-        active_widget = self.root.focus_get()
-        if isinstance(active_widget, tk.Text):
-            active_widget.insert(tk.INSERT, value)
 
     def save_to_file(self):
         """Zapisuje dane do pliku w odpowiednim formacie."""
-        # Pobranie danych z GUI
         target = self.target_field.get("1.0", tk.END).strip()
         optimization = self.optimization_type.get().strip()
-        limits = self.limits_field.get("1.0", tk.END).strip()
 
-        # Sprawdzenie, czy typ optymalizacji jest ustawiony
+        # Użyj oryginalnych ograniczeń, jeśli istnieją
+        if hasattr(self, "original_constraints") and self.original_constraints:
+            limits = self.original_constraints
+        else:
+            limits = self.limits_field.get("1.0", tk.END).strip()
+
         if not optimization:
-            messagebox.showerror("Błąd", "Wybierz typ optymalizacji (Min lub Max).")
+            messagebox.showerror("Błąd", "Wybierz typ (Min lub Max).")
             return
 
-        # Usuwanie zbędnych spacji z funkcji celu
+        # Usuwanie spacji w funkcji celu
         target_no_spaces = re.sub(r'\s+', '', target)
 
-        # Walidacja liczby zmiennych decyzyjnych w funkcji celu
+        # Walidacja liczby zmiennych decyzyjnych
         variables = re.findall(r'x\d+', target_no_spaces)
         if len(set(variables)) > 10:
             messagebox.showerror("Błąd", "Funkcja celu może zawierać maksymalnie 10 zmiennych decyzyjnych.")
@@ -160,7 +156,6 @@ class GUI:
 
         # Walidacja i formatowanie ograniczeń
         try:
-            # Konwersja ograniczeń na format plikowy
             formatted_limits = parser.convert_to_file_format(limits)
             formatted_target = parser.convert_to_file_format(target_no_spaces)
             formatted_data = f"{optimization} {formatted_target}\n{formatted_limits}"
@@ -173,7 +168,6 @@ class GUI:
                                                  filetypes=[("Text files", "*.txt")])
         if file_path:
             try:
-                # Zapis danych do pliku
                 with open(file_path, "w", encoding="utf-8") as file:
                     file.write(formatted_data)
                 messagebox.showinfo("Sukces", "Dane zapisane do pliku!")
